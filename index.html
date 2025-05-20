@@ -1,38 +1,106 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Redações com IA</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador de Redações com IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .fade-in {
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
-<body class="flex items-center justify-center min-h-screen bg-gray-100 font-sans py-8">
-    <div class="container max-w-4xl mx-auto text-center p-4">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">Gerador de Redações com IA</h1>
-
-        <div id="formulario" class="bg-white p-6 rounded-xl shadow-md mb-6 border border-gray-200 max-w-xl mx-auto">
-            <h3 class="text-xl font-semibold mb-4 text-gray-700">Informe os elementos para gerar a redação</h3>
-
-            <div id="ingredients" class="space-y-3 mb-4">
-                <div class="ingredient-row flex items-center space-x-2">
-                    <input type="text" class="ingredient ingredient-input flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700" placeholder="Ex: desigualdade, meio ambiente, internet">
-                    <button class="btn-danger bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed transition duration-300 text-sm">Excluir</button>
-                </div>
-                <!-- Copie mais inputs se quiser mais de 3 visíveis -->
-            </div>
-
-            <div class="flex justify-center">
-                <button id="add-ingredient-btn" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2 transition duration-300 text-md">Adicionar Elemento</button>
-                <button id="generate-recipe-btn" class="btn-success bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300 mr-2 text-md">Gerar Redação</button>
-                <button id="clear-ingredients-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-300 text-md">Limpar Campos</button>
-            </div>
-        </div>
-
-        <div id="response" class="response bg-white p-6 rounded-xl shadow-md border border-gray-200 mt-6 text-left hidden max-w-xl mx-auto">
-            Carregando...
-        </div>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white py-10 px-4">
+  <div class="max-w-2xl mx-auto bg-slate-900 rounded-2xl shadow-2xl p-8 border border-slate-700 fade-in">
+    <div class="flex justify-center items-center gap-4 mb-6">
+      <img src="./logo.png" alt="Logo" class="h-12 w-12 rounded-full shadow-md border border-white/30" />
+      <h1 class="text-3xl font-extrabold text-cyan-300 text-center">Gerador de Redações com IA</h1>
     </div>
 
-    <script src="./script.js" defer></script>
+    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+      <h2 class="text-lg font-semibold text-cyan-200 mb-4">Insira pelo menos 4 temas para gerar sua redação:</h2>
+
+      <div id="ingredients" class="space-y-4">
+        <div class="ingredient-row flex gap-3">
+          <input type="text" placeholder="Ex: educação, tecnologia, desigualdade"
+                 class="ingredient-input flex-1 p-3 rounded-lg border border-slate-600 bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          <button class="btn-danger bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm">Excluir</button>
+        </div>
+      </div>
+
+      <!-- Template para clonar -->
+      <template id="ingredient-template">
+        <div class="ingredient-row flex gap-3">
+          <input type="text" placeholder="Informe um elemento (ex: meio ambiente, guerras...)"
+                 class="ingredient-input flex-1 p-3 rounded-lg border border-slate-600 bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          <button class="btn-danger bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm">Excluir</button>
+        </div>
+      </template>
+
+      <div class="flex flex-wrap justify-center gap-4 mt-6">
+        <button id="add-ingredient-btn" class="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-2 rounded-lg font-semibold">+ Adicionar Tema</button>
+        <button id="generate-recipe-btn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-semibold">📄 Gerar Redação</button>
+        <button id="clear-ingredients-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-lg font-semibold">🧹 Limpar</button>
+      </div>
+    </div>
+
+    <div id="response" class="hidden bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg mt-8 text-gray-100">
+      Carregando...
+    </div>
+  </div>
+
+  <script>
+    const ingredientsContainer = document.getElementById("ingredients");
+    const template = document.getElementById("ingredient-template");
+    const addBtn = document.getElementById("add-ingredient-btn");
+    const clearBtn = document.getElementById("clear-ingredients-btn");
+    const generateBtn = document.getElementById("generate-recipe-btn");
+    const responseBox = document.getElementById("response");
+
+    // Função para adicionar evento de exclusão
+    function attachDeleteEvent(button) {
+      button.addEventListener("click", () => {
+        button.closest(".ingredient-row")?.remove();
+      });
+    }
+
+    // Adicionar evento ao botão inicial
+    document.querySelectorAll(".btn-danger").forEach(attachDeleteEvent);
+
+    // Adicionar novo campo
+    addBtn.addEventListener("click", () => {
+      const clone = template.content.cloneNode(true);
+      const deleteBtn = clone.querySelector(".btn-danger");
+      attachDeleteEvent(deleteBtn);
+      ingredientsContainer.appendChild(clone);
+    });
+
+    // Limpar todos os campos
+    clearBtn.addEventListener("click", () => {
+      ingredientsContainer.innerHTML = "";
+      const clone = template.content.cloneNode(true);
+      const deleteBtn = clone.querySelector(".btn-danger");
+      attachDeleteEvent(deleteBtn);
+      ingredientsContainer.appendChild(clone);
+    });
+
+    // Scroll suave ao gerar
+    generateBtn.addEventListener("click", () => {
+      responseBox.classList.remove("hidden");
+      responseBox.textContent = "Carregando...";
+
+      setTimeout(() => {
+        responseBox.scrollIntoView({ behavior: "smooth" });
+        responseBox.textContent = "🔧 Aqui virá sua redação gerada com IA...";
+      }, 1500);
+    });
+  </script>
 </body>
 </html>
