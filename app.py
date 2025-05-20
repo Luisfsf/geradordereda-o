@@ -20,6 +20,13 @@ def gerar_redacao(temas):
 
         A redação pode ser sobre temas variados como política, guerras, meio ambiente, sociedade, etc.
         A estrutura deve seguir os padrões de uma redação dissertativa: introdução, desenvolvimento e conclusão.
+        ⚠️ Importante:
+        - **Não gere nenhum conteúdo ofensivo**. Isso inclui, mas não se limita a: racismo, xenofobia, homofobia, sexismo, capacitismo, discurso de ódio ou qualquer forma de preconceito.
+    - Caso algum dos temas contenha esse tipo de conteúdo, **não produza a redação**. Em vez disso, **retorne uma mensagem amigável orientando o usuário sobre o uso responsável da ferramenta.**
+
+        A redação deve:
+        - Ter estrutura dissertativa (introdução, desenvolvimento, conclusão).
+        - Ser ética, educativa, e respeitar os direitos humanos.
 
         Retorne no seguinte formato JSON:
         redacao = {{
@@ -28,6 +35,7 @@ def gerar_redacao(temas):
   "linhas": [
     "Parágrafo 1",
     "Parágrafo 2",
+    "Parágrafo 3"
     "Conclusão"
   ]
 }}
